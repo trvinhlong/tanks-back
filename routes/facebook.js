@@ -6,7 +6,7 @@ var FB = require('fb');
 var fb = new FB.Facebook();
 var request = require('request');
 var fs = require('file-system');
-var appConfig = require('../appConfig');
+var config = require('../config');
 
 var download = function(uri, filename, callback){
   request.head(uri, function(err, res, body){
@@ -14,7 +14,7 @@ var download = function(uri, filename, callback){
   });
 };
 
-passport.use(new Strategy(appConfig,
+passport.use(new Strategy(config.fbApp,
   function(accessToken, refreshToken, profile, cb) {
     FB.setAccessToken(accessToken);
     return cb(null, profile);
@@ -30,8 +30,8 @@ passport.deserializeUser(function(obj, cb) {
 
 function getPhotos() {
     FB.options({
-        client_id: appConfig.clientID,
-        client_secret: appConfig.clientSecret
+        client_id: config.fbApp.clientID,
+        client_secret: config.fbApp.clientSecret
     })
     FB.api('913563252113498/photos', { fields: 'images,name', limit: 50 }, function (res) {
         if(!res || res.error) {
@@ -40,14 +40,14 @@ function getPhotos() {
         }
         // remove all existing files
         fs.readdir('./public/images', function(err, items) {
-            items.forEach((img, index) => {
-              fs.unlink('./public/images/' + index + '.jpg', () => {console.log('deleted ' + index)});
+            items.forEach(function(img, index) {
+              fs.unlink('./public/images/' + index + '.jpg', function(){console.log('deleted ' + index)});
             });
         });
         
         // download new files
         res['data'].forEach((img, index) => {
-            download(img['images'][0]['source'], './public/images/' + index + '.jpg', () => {console.log('downloaded ' + index)});
+            download(img['images'][0]['source'], './public/images/' + index + '.jpg', function(){console.log('downloaded ' + index)});
         });
     })
 }

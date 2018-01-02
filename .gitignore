@@ -58,3 +58,6 @@ typings/
 .env
 appConfig.js
 package-lock.json
+.idea
+public/images
+config.js
